@@ -69,6 +69,16 @@ static inline bool _gpio_read(uint16_t pin) {
     return 1 & (gpio->IDR >> PINNO(pin));
 }
 
+static inline void _gpio_init(gpio_config *config) {
+    gpio_set_mode(config->pin, config->mode);
+    gpio_set_output_type(config->pin, config->output_type);
+    gpio_set_speed(config->pin, config->output_speed);
+    gpio_set_output_type(config->pin, config->output_type);
+    if (config->mode == GPIO_MODE_AF) {
+        gpio_set_af(config->pin, config->af);
+    }
+}
+
 int gpio_init(gpio_config *config);
 int gpio_write(uint16_t pin, bool val);
 int gpio_read(uint16_t pin);
