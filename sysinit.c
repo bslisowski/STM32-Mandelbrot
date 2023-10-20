@@ -21,3 +21,9 @@ void SystemInit(void) {
 
     SysTick_Config(SystemCoreClock / 1000);
 }
+
+volatile uint32_t s_ticks;
+
+void SysTick_Handler(void) {
+    s_ticks++;
+}
