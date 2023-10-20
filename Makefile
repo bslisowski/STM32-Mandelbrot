@@ -4,7 +4,7 @@ CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include \
             -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lrdimon -u _printf_float -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES = main.c syscalls.c sysinit.c hal/gpio.c hal/usart.c
+SOURCES = main.c syscalls.c sysinit.c hal/gpio.c hal/usart.c hal/pwm.c
 SOURCES += cmsis_f3/Source/Templates/gcc/startup_stm32f303x8.s
 
 ifeq ($(OS),Windows_NT)

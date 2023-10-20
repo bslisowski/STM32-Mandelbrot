@@ -1,6 +1,7 @@
 #include "hal/gpio.h"
 #include "hal/usart.h"
 #include "hal/hal_common.h"
+#include "hal/pwm.h"
 #include "hal/nucleo_f303k8_pins.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,24 +9,28 @@
 
 
 int main(void) {
-    uint16_t led = D13;
-    gpio_config led_config = { 
-        led,  
-        GPIO_MODE_OUTPUT, 
-        GPIO_OUTPUT_PP,
-        GPIO_SPEED_LOW,
-        GPIO_PULL_NONE,
-        AF14
-    };
-    gpio_init(&led_config);
 
     uart_init(UART_DEBUG, 115200);
-    uint8_t onoff = 0;
+    init_pwm(PIN('B', 6), 100, 90);
+
+    int32_t duty = 0;
+    int8_t updown = 1;
+    uint32_t timer = 0, period = 1;
     for (;;) {
-        printf("Hello!\r\n");
-        onoff = !onoff;
-        gpio_write(led, onoff);
-        delay_ms(1000);
+        if (timer_expired(&timer, period, s_ticks)) {
+            duty += updown * 10;
+            if (duty <= 0) {
+                updown = 1;
+                TIM16->CCR1 = 0;
+            }
+            else if (duty >= 19999) {
+                updown = -1;
+                TIM16->CCR1 = 19999;
+            }
+            else {
+                TIM16->CCR1 = (uint16_t)duty;
+            }
+        }
     }
     return 0;
 }

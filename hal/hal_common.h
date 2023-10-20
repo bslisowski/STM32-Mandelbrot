@@ -27,4 +27,12 @@ static inline void delay_ms(uint32_t ms) {
     while (s_ticks < t) (void) 0;
 }
 
+static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+    if (now + prd < *t) *t = 0;
+    if (*t == 0) *t = now + prd;
+    if (*t > now) return false;
+    *t = (now - *t) > prd ? now + prd : *t + prd;
+    return true; 
+}
+
 #endif

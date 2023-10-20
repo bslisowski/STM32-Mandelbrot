@@ -26,6 +26,11 @@
 #define A6  PIN('A', 7)
 #define A7  PIN('A', 2)
 
-#define LED0 D13
+#define LED3        D13
+#define USART1_TX   D1
+#define USART1_RX   D0
+#define MOSI        D11  
+#define MISO        D12
+
 
 #endif
