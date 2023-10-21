@@ -29,9 +29,6 @@
 #define LED3        D13
 #define USART1_TX   D1
 #define USART1_RX   D0
-#define MOSI        D11  
-#define MISO        D12
-#define SCK         D13
 
 #define TIM1_CH1    PIN('A', 8)
 #define TIM1_CH4    PIN('A', 11)

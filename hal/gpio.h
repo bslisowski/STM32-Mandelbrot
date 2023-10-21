@@ -21,6 +21,7 @@ enum { GPIO_SPEED_LOW, GPIO_SPEED_MEDIUM, GPIO_SPEED_HIGH, GPIO_SPEED_INSANE };
 enum { GPIO_PULL_NONE, GPIO_PULLUP, GPIO_PULLDOWN };
 enum { AF0, AF1, AF2, AF3, AF4, AF5, AF6, AF7, AF8, AF9, AF10, AF12, AF13, AF14, AF15 };
 
+
 #define IS_GPIO_MODE(m) ((m < 0 || m > 3) ? 0 : 1)
 #define IS_GPIO_OUTPUT_TYPE(o) ((o < 0 || o > 1) ? 0 : 1)
 #define IS_GPIO_SPEED(s) ((s < 0 || s > 3) ? 0 : 1)
