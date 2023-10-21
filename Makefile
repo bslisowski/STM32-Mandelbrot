@@ -1,4 +1,4 @@
-CFLAGS  ?=  -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
+CFLAGS  ?=  -O2 -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -Wformat-truncation -fno-common -Wconversion \
             -g3 -Os -ffunction-sections -fdata-sections \
             -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include \

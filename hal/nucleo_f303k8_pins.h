@@ -31,6 +31,13 @@
 #define USART1_RX   D0
 #define MOSI        D11  
 #define MISO        D12
+#define SCK         D13
 
+#define TIM1_CH1    PIN('A', 8)
+#define TIM1_CH4    PIN('A', 11)
+#define TIM3_CH3    PIN('B', 0)
+#define TIM3_CH4    PIN('B', 1)
+#define TIM16_CH1N  PIN('B', 6)
+#define TIM17_CH1   PIN('B', 5)
 
 #endif

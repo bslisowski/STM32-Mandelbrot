@@ -4,18 +4,24 @@
 #include "gpio.h"
 #include <stdio.h>
 
-#define PWM_FREQ(pwmfreq, timfreq) ((uint16_t)((timfreq / pwmfreq) - 1))
-#define PWM_DC(pwmfreq, percent) ((uint16_t)(((float)pwmfreq * ((float)percent / 100.f))))
+
+#define PWM_FREQ(pwmfreq, timfreq) ((uint32_t)((timfreq / pwmfreq) - 1))
+#define PWM_DC(pwmfreq, percent) ((uint32_t)(((float)pwmfreq * ((float)percent / 100.f))))
 
 enum {PWM_MODE_1 = 6, PWM_MODE_2 };
 
-// 
-static inline void init_pwm(uint16_t pin, uint32_t freq, uint8_t dc_perc) {
+static inline void _set_duty_cycle(TIM_TypeDef *tim, uint8_t dc) {
+    uint32_t f = tim->ARR;
+    uint16_t d = (uint16_t)PWM_DC(f, dc);
+    tim->CCR1 = d;
+}
 
-    uint16_t f = PWM_FREQ(freq, APB2_FREQUENCY);
-    uint16_t dc = PWM_DC(f, dc_perc);
-    printf("PWM_FREQ = %d\r\n", f);
-    printf("PWM_DC = %d\r\n", dc);
+static inline void enable_pwm(TIM_TypeDef *tim) {
+    tim->CR1 |= TIM_CR1_CEN;
+}
+ 
+static inline void _init_pwm(uint16_t pin, uint32_t freq, uint16_t dc) {
+
     gpio_config config = {
         pin, GPIO_MODE_AF, GPIO_OUTPUT_PP, GPIO_SPEED_HIGH, 0, AF1
     };
@@ -23,8 +29,8 @@ static inline void init_pwm(uint16_t pin, uint32_t freq, uint8_t dc_perc) {
     
     RCC->APB2ENR |= RCC_APB2ENR_TIM16EN;
 
-    TIM16->ARR = f;
-    TIM16->CCR1 = 0;
+    TIM16->ARR = freq;
+    TIM16->CCR1 = dc;
     TIM16->CCMR1 |= TIM_CCMR1_OC1PE;
     TIM16->CCMR1 |= ((uint32_t)PWM_MODE_2 << TIM_CCMR1_OC1M_Pos);
     TIM16->CCMR1 &= ~(3U << TIM_CCMR1_CC1S_Pos);
@@ -34,7 +40,10 @@ static inline void init_pwm(uint16_t pin, uint32_t freq, uint8_t dc_perc) {
     TIM16->BDTR |= TIM_BDTR_MOE;
     TIM16->CR1 |= TIM_CR1_ARPE;
     TIM16->CR1 |= TIM_CR1_CEN;
-
-
 }
+
+
+int init_pwm(uint16_t pin, uint32_t freq, uint8_t dc);
+int set_duty_cycle(uint16_t pin, uint8_t dc);
+
 #endif
