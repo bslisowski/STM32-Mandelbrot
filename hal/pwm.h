@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 
-#define PWM_FREQ(pwmfreq, timfreq) ((uint32_t)((timfreq / pwmfreq) - 1))
+#define PWM_FREQ(pwmfreq, timfreq) ((uint32_t)((timfreq / 2 / pwmfreq) - 1))
 #define PWM_DC(pwmfreq, percent) ((uint32_t)(((float)pwmfreq * ((float)percent / 100.f))))
 
 enum {PWM_MODE_1 = 6, PWM_MODE_2 };
@@ -31,6 +31,7 @@ static inline void _init_pwm(uint16_t pin, uint32_t freq, uint16_t dc) {
 
     TIM16->ARR = freq;
     TIM16->CCR1 = dc;
+    TIM16->PSC = 2;
     TIM16->CCMR1 |= TIM_CCMR1_OC1PE;
     TIM16->CCMR1 |= ((uint32_t)PWM_MODE_2 << TIM_CCMR1_OC1M_Pos);
     TIM16->CCMR1 &= ~(3U << TIM_CCMR1_CC1S_Pos);
