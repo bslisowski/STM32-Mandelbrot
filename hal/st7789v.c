@@ -1,5 +1,22 @@
 #include "st7789v.h"
 #include <stdio.h>
+#include "font.h"
+
+int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
+    if (digit > 9) {
+        return -1;
+    }
+
+    const uint8_t *d = _digit_arr[digit];
+    for (int i = 0; i < 72; i++) {
+        for (int j = 0; j < 8; j++) {
+            b->buffer[i*8 + j] = d[i] & (1 << (7 - j) ) ? color : 0xFFFF;
+        }
+    }
+
+    _draw(b);
+    return 0;
+}
 
 int draw(struct display_buffer *b) {
     _draw(b);
@@ -16,13 +33,50 @@ int set_background(struct display_buffer *b) {
         while (x + b->width <= display->height) {
             b->x = x;
             _draw(b);
-            x++;
+            x += b->width;
         }
-        y++;
+        y += b->height;
     }
 
     return 0;
 }
+
+void fill(uint16_t color) {
+    uint16_t addr[2];
+    addr[0] = 0;
+    addr[1] = (uint16_t)239;
+    uint8_t buf[4];
+    buf[0] = (uint8_t)(addr[0] >> 8);
+    buf[1] = (uint8_t)(addr[0] & 0xFF);
+    buf[2] = (uint8_t)(addr[1] >> 8);
+    buf[3] = (uint8_t)(addr[1] & 0xFF);
+    _write_st7789v(ST7789V_CASET, buf, 4);
+    _write_st7789v(ST7789V_RASET, buf, 4);
+    cs_enable(display->cs);
+    spin(1);
+    _gpio_write(display->dc, 0);
+    spi_write_byte(ST7789V_RAMWR);
+    while ((SPI1->SR & SPI_SR_TXE_Msk) == 0) spin(1);
+    while ((SPI1->SR & SPI_SR_BSY_Msk) == 0) spin(1);
+    uint32_t temp = SPI1->DR;
+    temp = SPI1->SR;
+    (void)temp;
+    spin(1);
+    _gpio_write(display->dc, 1);
+    for (int i = 57600; i >= 0; i--) {
+        spi_write_byte((uint8_t)color);
+        spi_write_byte((uint8_t)(color >> 8));
+    }
+    while ((SPI1->SR & SPI_SR_TXE_Msk) == 0) spin(1);
+    while ((SPI1->SR & SPI_SR_BSY_Msk) == 0) spin(1);
+    temp = SPI1->DR;
+    temp = SPI1->SR;
+    (void)temp;
+    spin(2);
+    cs_disable(display->cs);
+    // printf("HELLO\r\n");
+}
+
 
 void display_on() {
     _write_st7789v(ST7789V_DISPON, NULL, 0);

@@ -17,6 +17,8 @@
 #define IS_MISO_PIN(p) (p == MISO || p == MISO_ALT)
 #define IS_SCK_PIN(p) (p == SCK || p == SCK_ALT)
 
+// void SPI1_IRQHandler(void);
+
 static inline void _init_spi(uint16_t miso, uint16_t mosi, uint16_t sck) {
     
     gpio_config mo = {
@@ -31,6 +33,8 @@ static inline void _init_spi(uint16_t miso, uint16_t mosi, uint16_t sck) {
         sck, GPIO_MODE_AF, GPIO_OUTPUT_PP, GPIO_SPEED_HIGH, 0, AF5
     };
     _gpio_init(&sc);
+
+    // NVIC->ISER[1] |= (1U << 3);
 
     RCC->APB2ENR |= RCC_APB2ENR_SPI1EN_Msk;
 
@@ -73,6 +77,8 @@ static inline void spi_write_buf(uint8_t *buf, size_t len, uint16_t cs) {
     temp = SPI1->SR;
     (void)temp;
 }
+
+// spi interrupt 35
 
 
 int init_spi(uint16_t miso, uint16_t mosi, uint16_t sck);

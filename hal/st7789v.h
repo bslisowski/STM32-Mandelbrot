@@ -3,6 +3,7 @@
 
 #include "hal_common.h"
 #include "spi.h"
+#include <stdio.h>
 
 // COMMANDS
 #define ST7789V_NOP         0x00
@@ -129,17 +130,17 @@ static inline void _write_st7789v(uint8_t cmd, uint8_t *data, uint16_t size) {
     }
     spin(2);
     cs_disable(display->cs);
-    spin(1);
+    // spin(1);
 }
 
 static inline void _draw(struct display_buffer *b) {
     uint16_t x = b->x + display->x_offset;
     uint16_t y = b->y + display->y_offset;
-    uint16_t size = (uint16_t)(b->width * b->height - 1);
+    uint16_t size = (uint16_t)(b->width * b->height);
     // CASET/ RASET
     uint16_t addr[2];
     addr[0] = x;
-    addr[1] = (uint16_t)(x + b->width - (uint16_t)1);
+    addr[1] = (uint16_t)(x + b->width - 1);
     uint8_t buf[4];
     buf[0] = (uint8_t)(addr[0] >> 8);
     buf[1] = (uint8_t)(addr[0] & 0xFF);
@@ -148,7 +149,7 @@ static inline void _draw(struct display_buffer *b) {
     _write_st7789v(ST7789V_CASET, buf, 4);
 
     addr[0] = y;
-    addr[1] = (uint16_t)(y + b->height - (uint16_t)1);
+    addr[1] = (uint16_t)(y + b->height - 1);
     buf[0] = (uint8_t)(addr[0] >> 8);
     buf[1] = (uint8_t)(addr[0] & 0xFF);
     buf[2] = (uint8_t)(addr[1] >> 8);
@@ -156,6 +157,10 @@ static inline void _draw(struct display_buffer *b) {
     _write_st7789v(ST7789V_RASET, buf, 4);
     _write_st7789v(ST7789V_RAMWR, (uint8_t *)b->buffer, size * 2);
 }
+
+int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit);
+
+void fill(uint16_t color);
 
 int set_background(struct display_buffer *b);
 

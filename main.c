@@ -32,6 +32,12 @@
     // uint8_t ram[2] = {0x00, 0xF0};
     // uint8_t rgb[3] = { 0xCD, 0x08, 0x14};
 
+#define RED     0b1111100000000000 // 0x07E0u 
+#define GREEN   0b0000011111100000 // 0x001Fu
+#define BLUE    0b0000000000011111 // 0xF800u
+#define BLACK   0x0000
+#define WHITE   0xFFFF
+
 struct st7789v_config cfg = {
     SPI1,
     A3,
@@ -58,6 +64,8 @@ struct st7789v_config cfg = {
     { 0xCD, 0x08, 0x14},
 };
 
+uint16_t buff[4608];
+uint16_t col[] = {WHITE, RED, GREEN, BLUE, BLACK};
 
 int main(void) {
 
@@ -69,26 +77,39 @@ int main(void) {
     init_spi(MISO_ALT, MOSI_ALT, SCK_ALT);
     // int32_t duty = 0;
     // int8_t updown = 1;
-    uint32_t timer = 0, period = 1000;
+    //uint32_t timer = 0, period = 1000;
 
     // (void) duty, (void) updown, (void) timer, (void) period;
     //delay_ms(10);
     printf("Init disp\r\n");
     init_st7789v(&cfg);
-    uint16_t buff[4608];
-    for (int i = 4607; i >= 0; i--) {
-        buff[i] = 0xFFFF;
-    }
     struct display_buffer db = {
         (uint16_t *)buff,
         0,
         0,
-        12,
-        12
+        24,
+        24
     };
+    uint8_t col_index = 0;
+    (void)col_index;
+    for (int i = 4607; i >= 0; i--) {
+        buff[i] = WHITE;
+    }
     set_background(&db);
+
+    db.x = (240 / 2) - 12; 
+    db.y = (240 / 2) - 12; 
+    
+    // db.x += 24;
+    draw_digit(&db, RED, 0);
     printf("disp ready\r\n");
+    //int num_count = 10;
+    //int num_index = 0;
     for (;;) {
+        spin(1);
+        // draw_digit(&db, RED, (uint8_t)num_index);
+        // num_index = (num_index + 1) % num_count;
+        // delay_ms(3000);
         // if (timer_expired(&timer, period, s_ticks)) {
         //     // duty += updown;
         //     // if (duty <= 0) {
@@ -100,6 +121,13 @@ int main(void) {
         //     // set_duty_cycle(pwm, (uint8_t)duty);
         //     // spi_write_buf((uint16_t *)"Hello", 5);
         // }
+        
+        // set_background(&db);
+        // col_index = (uint8_t)((col_index + 1) % 5);
+        // delay_ms(3000);
+        // fill(col[col_index]);
+        // col_index = (uint8_t)((col_index + 1) % 5);
+        // delay_ms(3000);
     }
     return 0;
 }
