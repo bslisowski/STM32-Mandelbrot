@@ -160,6 +160,8 @@ static inline void _draw(struct display_buffer *b) {
 
 int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit);
 
+int draw_number(struct display_buffer *b, uint16_t color, uint32_t num);
+
 void fill(uint16_t color);
 
 int set_background(struct display_buffer *b);

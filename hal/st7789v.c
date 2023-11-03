@@ -1,6 +1,7 @@
 #include "st7789v.h"
 #include <stdio.h>
 #include "font.h"
+#include <math.h>
 
 int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
     if (digit > 9) {
@@ -15,6 +16,20 @@ int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
     }
 
     _draw(b);
+    return 0;
+}
+
+
+int draw_number(struct display_buffer *b, uint16_t color, uint32_t num) {
+    uint32_t temp = num;
+    uint8_t num_digits = 1;
+    while ((temp /= 10)) num_digits++;
+    b->x = (uint16_t)((display->width / 2) + (num_digits * b->width / 2));
+    while (num_digits--) {
+        b->x -= 24;
+        draw_digit(b, color, (uint8_t)(num%10));
+        num /= 10;
+    }
     return 0;
 }
 

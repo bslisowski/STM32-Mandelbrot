@@ -101,7 +101,7 @@ int main(void) {
     db.y = (240 / 2) - 12; 
     
     // db.x += 24;
-    draw_digit(&db, RED, 0);
+    draw_number(&db, RED, 1234567890);
     printf("disp ready\r\n");
     //int num_count = 10;
     //int num_index = 0;
