@@ -7,7 +7,6 @@ int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
     if (digit > 9) {
         return -1;
     }
-
     const uint8_t *d = _digit_arr[digit];
     for (int i = 0; i < 72; i++) {
         for (int j = 0; j < 8; j++) {
@@ -21,9 +20,12 @@ int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
 
 
 int draw_number(struct display_buffer *b, uint16_t color, uint32_t num) {
+    static uint8_t prev_num_digits = 0;
     uint32_t temp = num;
     uint8_t num_digits = 1;
     while ((temp /= 10)) num_digits++;
+    if (num_digits < prev_num_digits) clear_line(b);
+    prev_num_digits = num_digits;
     b->x = (uint16_t)((display->width / 2) + (num_digits * b->width / 2));
     while (num_digits--) {
         b->x -= 24;

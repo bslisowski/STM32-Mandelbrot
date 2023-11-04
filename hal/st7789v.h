@@ -158,6 +158,17 @@ static inline void _draw(struct display_buffer *b) {
     _write_st7789v(ST7789V_RAMWR, (uint8_t *)b->buffer, size * 2);
 }
 
+static inline void clear_line(struct display_buffer *b) {
+    for (int i = 4607; i >= 0; i--) {
+        b->buffer[i] = 0xFFFF;
+    }
+    b->x = 0;
+    while (b->x + b->width < display->width) {
+        _draw(b);
+        b->x += b->width;
+    }
+}
+
 int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit);
 
 int draw_number(struct display_buffer *b, uint16_t color, uint32_t num);

@@ -23,24 +23,25 @@ static inline void enable_pwm(TIM_TypeDef *tim) {
 static inline void _init_pwm(uint16_t pin, uint32_t freq, uint16_t dc) {
 
     gpio_config config = {
-        pin, GPIO_MODE_AF, GPIO_OUTPUT_PP, GPIO_SPEED_HIGH, 0, AF1
+        pin, GPIO_MODE_AF, GPIO_OUTPUT_PP, GPIO_SPEED_HIGH, 0, AF2
     };
     gpio_init(&config);
     
-    RCC->APB2ENR |= RCC_APB2ENR_TIM16EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
-    TIM16->ARR = freq;
-    TIM16->CCR1 = dc;
-    TIM16->PSC = 2;
-    TIM16->CCMR1 |= TIM_CCMR1_OC1PE;
-    TIM16->CCMR1 |= ((uint32_t)PWM_MODE_1 << TIM_CCMR1_OC1M_Pos);
-    TIM16->CCMR1 &= ~(3U << TIM_CCMR1_CC1S_Pos);
-    TIM16->CCER |= TIM_CCER_CC1E;
-    TIM16->CR2 |= TIM_CR2_CCPC;
-    TIM16->EGR |= TIM_EGR_CC1G | TIM_EGR_UG;
-    TIM16->BDTR |= TIM_BDTR_MOE;
-    TIM16->CR1 |= TIM_CR1_ARPE;
-    TIM16->CR1 |= TIM_CR1_CEN;
+    TIM3->ARR = freq;
+    TIM3->CCR3 = dc;
+    TIM3->PSC = 2;
+    TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+    TIM3->CCMR2 |= ((uint32_t)PWM_MODE_1 << TIM_CCMR2_OC3M_Pos);
+    TIM3->CCMR2 &= ~(3U << TIM_CCMR2_CC3S_Pos);
+    TIM3->CCER |= TIM_CCER_CC3E;
+  //  TIM3->CCER &= ~TIM_CCER_CC3NE;
+    // TIM3->CR2 |= TIM_CR2_CCPC; capture compare preloaded
+    TIM3->EGR |= TIM_EGR_CC3G | TIM_EGR_UG;
+    // TIM3->BDTR |= TIM_BDTR_MOE; main output enable
+    TIM3->CR1 |= TIM_CR1_ARPE;
+    TIM3->CR1 |= TIM_CR1_CEN;
 }
 
 

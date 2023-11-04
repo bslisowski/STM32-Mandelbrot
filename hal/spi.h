@@ -25,6 +25,7 @@ static inline void _init_spi(uint16_t miso, uint16_t mosi, uint16_t sck) {
         mosi, GPIO_MODE_AF, GPIO_OUTPUT_PP, GPIO_SPEED_HIGH, 0, AF5
     };
     _gpio_init(&mo);
+    (void)miso;
     gpio_config mi = {
         miso, GPIO_MODE_AF, 0, GPIO_SPEED_HIGH, 0, AF5
     };

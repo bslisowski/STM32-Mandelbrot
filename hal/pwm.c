@@ -23,10 +23,11 @@ int init_pwm(uint16_t pin, uint32_t freq, uint8_t dc) {
 }
 
 int set_duty_cycle(uint16_t pin, uint8_t dc) {
-    if (pin != TIM16_CH1N){
-        printf("ERR: Invalid pin\r\n");
-        return -1;
-    }
+    // if (pin != TIM16_CH1N){
+    //     printf("ERR: Invalid pin\r\n");
+    //     return -1;
+    // }
+    (void)pin;
     if (dc > 100) {
         printf("ERR: Invalid duty cycle\r\n");
         return -1;
