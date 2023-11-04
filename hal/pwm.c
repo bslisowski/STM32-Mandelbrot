@@ -4,10 +4,10 @@
 
 int init_pwm(uint16_t pin, uint32_t freq, uint8_t dc) {
 
-    if (pin != TIM16_CH1N){
-        printf("ERR: Invalid pin\r\n");
-        return -1;
-    }
+    // if (pin != TIM16_CH1N){
+    //     printf("ERR: Invalid pin\r\n");
+    //     return -1;
+    // }
     uint32_t f = PWM_FREQ(freq, APB2_FREQUENCY);
     if (f >> 16) {
         printf("ERR: Invalid frequency\r\n");

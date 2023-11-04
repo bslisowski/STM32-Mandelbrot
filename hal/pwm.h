@@ -33,9 +33,9 @@ static inline void _init_pwm(uint16_t pin, uint32_t freq, uint16_t dc) {
     TIM16->CCR1 = dc;
     TIM16->PSC = 2;
     TIM16->CCMR1 |= TIM_CCMR1_OC1PE;
-    TIM16->CCMR1 |= ((uint32_t)PWM_MODE_2 << TIM_CCMR1_OC1M_Pos);
+    TIM16->CCMR1 |= ((uint32_t)PWM_MODE_1 << TIM_CCMR1_OC1M_Pos);
     TIM16->CCMR1 &= ~(3U << TIM_CCMR1_CC1S_Pos);
-    TIM16->CCER |= TIM_CCER_CC1NE;
+    TIM16->CCER |= TIM_CCER_CC1E;
     TIM16->CR2 |= TIM_CR2_CCPC;
     TIM16->EGR |= TIM_EGR_CC1G | TIM_EGR_UG;
     TIM16->BDTR |= TIM_BDTR_MOE;
