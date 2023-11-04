@@ -5,8 +5,6 @@
 #include "gpio.h"
 
 
-
-
 static inline void i2c_read(uint8_t addr, uint8_t *data, uint8_t size) {
     I2C1->CR2 |= (addr << I2C_CR2_SADD_Pos);
     I2C1->CR2 |= I2C_CR2_RD_WRN;
