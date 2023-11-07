@@ -44,15 +44,11 @@ struct st7789v_config cfg = {
 };
 
 uint16_t buff[4608];
-uint16_t col[] = {WHITE, RED, GREEN, BLUE, BLACK};
 
 int init_tof(void)
 {
-
-	/*********************************/
-	/*   VL53L4CD ranging variables  */
-	/********************* ************/
-    printf("INIT TOF\r\n");
+    _gpio_write(D9, 1);
+    delay_ms(1);
 	Dev_t 					dev = 0x52;
 	uint8_t 				status;
 	status = VL53L4CD_SensorInit(dev);
@@ -62,9 +58,7 @@ int init_tof(void)
 		return status;
 	}
 
-	printf("VL53L4CD ULD ready !\r\n");
-
-    // status = VL53L4CD_SetRangeTiming(dev, 200, 0);
+    // status = VL53L4CD_SetRangeTiming(dev, 100, 0);
 	// if(status)
 	// {
 	// 	printf("VL53L4CD_SetRangeTiming failed with status %u\n", status);
@@ -76,19 +70,21 @@ int init_tof(void)
 
 
 
-
 int main(void) {
     uart_init(UART_DEBUG, 115200);
     uint16_t pwm = PIN('B', 0);
     init_pwm(pwm, 100, 90);
-    set_duty_cycle(pwm, 80);
+    set_duty_cycle(pwm, 50);
 
-    gpio_set_mode(PIN('A', 5), GPIO_MODE_INPUT);
-    gpio_set_mode(PIN('A', 6), GPIO_MODE_INPUT);
+    gpio_set_mode(D9, GPIO_MODE_OUTPUT);
+    _gpio_write(D9, 0);
+
     init_spi(MISO, MOSI, SCK);
 
-    printf("Init disp\r\n");
+    printf("Init disp...");
+    
     init_st7789v(&cfg);
+    printf("Finished\r\n");
     struct display_buffer db = {
         (uint16_t *)buff,
         0,
@@ -103,20 +99,26 @@ int main(void) {
     set_background(&db);
     db.y = 108;
     draw_number(&db, RED, 0);
+    printf("Init I2C...");
     _i2c_init(PIN('B', 6), PIN('B', 7));
-    draw_number(&db, RED, 1);
-    // delay_ms(1);
-    draw_number(&db, RED, 2);
+    printf("Finished\r\n");
+    //draw_number(&db, RED, 1);
+    
+    //draw_number(&db, RED, 2);
+    printf("Init TOF\r\n");
     init_tof();
-    printf("TOF\r\n");
-    draw_number(&db, RED, 3);
-    delay_ms(3000);
+    printf("Finished\r\n");
+   // draw_number(&db, RED, 3);
+    
     Dev_t 					dev = 0x52;
 	uint8_t 				status, isReady;
 	VL53L4CD_ResultsData_t 		results;
-
+    // uint16_t num = 0;
+    //(void)num;
     for (;;) {
-        status = VL53L4CD_StartRanging(dev);
+        
+        VL53L4CD_StartRanging(dev);
+        isReady = 0;
         do {
             status = VL53L4CD_CheckForDataReady(dev, &isReady);
             delay_ms(5);
@@ -124,14 +126,14 @@ int main(void) {
 
         VL53L4CD_ClearInterrupt(dev);
         VL53L4CD_GetResult(dev, &results);
-        printf("Status = %6u, Distance = %6u, Signal = %6u\r\n",
+        printf("Status = %6u, Distance = %6u, Signal = %6u, Status = %d\r\n",
             results.range_status,
             results.distance_mm,
-            results.signal_per_spad_kcps);
-        status = VL53L4CD_StopRanging(dev);
-        printf("End of ULD demo\r\nStatus = %d\r\n", status);
+            results.signal_per_spad_kcps, status);
+        VL53L4CD_StopRanging(dev);
+        //printf("End of ULD demo\r\nStatus = %d\r\n", status);
         draw_number(&db, RED, (uint32_t)results.distance_mm);
-        delay_ms(1000);
+        delay_ms(500);
     }
     return 0;
 }

@@ -1,6 +1,7 @@
 #include "hal/hal_common.h"
+#include <inttypes.h>
 
-uint32_t SystemCoreClock = HLCK_FREQUENCY;
+uint32_t SystemCoreClock = SYS_FREQUENCY;
 
 void SystemInit(void) {
     SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));

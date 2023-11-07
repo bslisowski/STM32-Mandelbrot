@@ -10,7 +10,7 @@ int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
     const uint8_t *d = _digit_arr[digit];
     for (int i = 0; i < 72; i++) {
         for (int j = 0; j < 8; j++) {
-            b->buffer[i*8 + j] = d[i] & (1 << (7 - j) ) ? color : 0xFFFF;
+            b->buffer[i*8 + j] = d[i] & (1 << (7 - j)) ? color : 0xFFFF;
         }
     }
 
@@ -20,6 +20,7 @@ int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
 
 
 int draw_number(struct display_buffer *b, uint16_t color, uint32_t num) {
+    //printf("DRAWING NUMBER: %ld... ", num);
     static uint8_t prev_num_digits = 0;
     uint32_t temp = num;
     uint8_t num_digits = 1;
@@ -32,6 +33,7 @@ int draw_number(struct display_buffer *b, uint16_t color, uint32_t num) {
         draw_digit(b, color, (uint8_t)(num%10));
         num /= 10;
     }
+    //printf("FINISHED\r\n");
     return 0;
 }
 

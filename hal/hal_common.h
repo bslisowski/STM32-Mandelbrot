@@ -11,10 +11,12 @@ enum { APB1_PRE = 0, APB2_PRE = 4, AHB_PRE = 8 };
 enum { PLL_HSI = 4, PLL_M = 10 };
 
 #define SYS_FREQUENCY ((PLL_HSI * PLL_M) * 1000000)         // 40MHz
-#define HLCK_FREQUENCY (AHB_PRE > 7 ? (SYS_FREQUENCY / (2 << (AHB_PRE - 8))) : AHB_PRE)    // 20
+#define HLCK_FREQUENCY (AHB_PRE > 7 ? (SYS_FREQUENCY / (2 << (AHB_PRE - 8))) : SYS_FREQUENCY)    // 20
 #define APB1_FREQUENCY (HLCK_FREQUENCY / (APB1_PRE > 3 ? BIT((APB1_PRE - 3)) : 1))         // 20
 #define APB2_FREQUENCY (HLCK_FREQUENCY / (APB2_PRE > 3 ? BIT((APB2_PRE - 3)) : 1))         // 10
 #define FLASH_LATENCY (HLCK_FREQUENCY > 48000000 ? 2 : HLCK_FREQUENCY > 24000000 ? 1 : 0)
+
+#define SYS_CORE_FREQUENCY (HLCK_FREQUENCY / 8)
 
 static inline void spin(volatile uint32_t count) {
     while (count--) asm("nop");
