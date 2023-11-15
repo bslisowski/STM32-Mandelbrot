@@ -1,9 +1,9 @@
 ENTRY(Reset_Handler);
 MEMORY {
   flash(rx)  : ORIGIN = 0x08000000, LENGTH = 64k
-  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 12k  /* remaining 64k in a separate address space */
+  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 12k
 }
-_estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
+_estack     = ORIGIN(sram) + LENGTH(sram);
 
 SECTIONS {
   .vectors  : { KEEP(*(.isr_vector)) }   > flash

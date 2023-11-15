@@ -8,7 +8,7 @@ int init_pwm(uint16_t pin, uint32_t freq, uint8_t dc) {
     //     printf("ERR: Invalid pin\r\n");
     //     return -1;
     // }
-    uint32_t f = PWM_FREQ(freq, APB2_FREQUENCY);
+    uint32_t f = PWM_FREQ(freq, APB1_FREQUENCY);
     if (f >> 16) {
         printf("ERR: Invalid frequency\r\n");
         return -1;

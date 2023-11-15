@@ -43,8 +43,6 @@ struct st7789v_config cfg = {
     { 0xCD, 0x08, 0x14},
 };
 
-uint16_t buff[4608];
-
 int init_tof(void)
 {
     _gpio_write(D9, 1);
@@ -57,64 +55,49 @@ int init_tof(void)
 		printf("VL53L4CD ULD Loading failed\r\n");
 		return status;
 	}
-
-    // status = VL53L4CD_SetRangeTiming(dev, 100, 0);
-	// if(status)
-	// {
-	// 	printf("VL53L4CD_SetRangeTiming failed with status %u\n", status);
-	// 	return status;
-	// }
-
 	return status;
 }
 
-
+const uint16_t w = 24;
+const uint16_t h = 24;
 
 int main(void) {
-    uart_init(UART_DEBUG, 115200);
+    //uart_init(UART_DEBUG, 115200);
     uint16_t pwm = PIN('B', 0);
     init_pwm(pwm, 100, 90);
-    set_duty_cycle(pwm, 50);
+    set_duty_cycle(pwm, 10);
 
     gpio_set_mode(D9, GPIO_MODE_OUTPUT);
     _gpio_write(D9, 0);
 
     init_spi(MISO, MOSI, SCK);
 
-    printf("Init disp...");
     
     init_st7789v(&cfg);
-    printf("Finished\r\n");
+    uint16_t buff[w*h];
     struct display_buffer db = {
         (uint16_t *)buff,
         0,
         0,
-        24,
-        24
+        w,
+        h
     };
-
-    for (int i = 4607; i >= 0; i--) {
-        db.buffer[i] = 0xFFFF;
+    
+    uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
+    for (int i = w*h-1; i >= 0; i--) {
+            db.buffer[i] = colors[0];
     }
     set_background(&db);
+
     db.y = 108;
     draw_number(&db, RED, 0);
-    printf("Init I2C...");
     _i2c_init(PIN('B', 6), PIN('B', 7));
-    printf("Finished\r\n");
-    //draw_number(&db, RED, 1);
-    
-    //draw_number(&db, RED, 2);
-    printf("Init TOF\r\n");
     init_tof();
-    printf("Finished\r\n");
-   // draw_number(&db, RED, 3);
     
     Dev_t 					dev = 0x52;
 	uint8_t 				status, isReady;
 	VL53L4CD_ResultsData_t 		results;
-    // uint16_t num = 0;
-    //(void)num;
+
     for (;;) {
         
         VL53L4CD_StartRanging(dev);
@@ -131,9 +114,9 @@ int main(void) {
             results.distance_mm,
             results.signal_per_spad_kcps, status);
         VL53L4CD_StopRanging(dev);
-        //printf("End of ULD demo\r\nStatus = %d\r\n", status);
+        
         draw_number(&db, RED, (uint32_t)results.distance_mm);
-        delay_ms(500);
+        delay_ms(250);
     }
     return 0;
 }

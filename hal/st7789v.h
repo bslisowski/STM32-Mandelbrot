@@ -91,7 +91,9 @@
 #define ST7789V_PROMACT     0xFE
 
 #define PIXEL_SIZE  16U
+// #define MAX_DISPLAY_BUFF_SIZE 10
 
+// typedef struct display_data { uint16_t d[MAX_DISPLAY_BUFF_SIZE] } display_data;
 
 struct st7789v_config {
     SPI_TypeDef *spi;
@@ -117,18 +119,20 @@ struct display_buffer {
 
 static struct st7789v_config *display;
 
+// static uint16_t cursor = 0;
+
 static inline void _write_st7789v(uint8_t cmd, uint8_t *data, uint16_t size) {
     cs_enable(display->cs);
     if (cmd != ST7789V_NOP) {
         _gpio_write(display->dc, 0);
-        spi_write_buf(&cmd, 1, display->cs);
+        spi_write_buf(&cmd, 1);
     }
 
     if (data != NULL) {
         _gpio_write(display->dc, 1);
-        spi_write_buf(data, size, display->cs);
+        spi_write_buf(data, size);
     }
-    spin(2);
+    spin(1);
     cs_disable(display->cs);
     // spin(1);
 }
@@ -159,11 +163,11 @@ static inline void _draw(struct display_buffer *b) {
 }
 
 static inline void clear_line(struct display_buffer *b) {
-    for (int i = 4607; i >= 0; i--) {
+    for (int i = b->width * b->height - 1; i >= 0; i--) {
         b->buffer[i] = 0xFFFF;
     }
     b->x = 0;
-    while (b->x + b->width < display->width) {
+    while (b->x + b->width <= display->width) {
         _draw(b);
         b->x += b->width;
     }
