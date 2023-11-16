@@ -132,7 +132,7 @@ static inline void _write_st7789v(uint8_t cmd, uint8_t *data, uint16_t size) {
         _gpio_write(display->dc, 1);
         spi_write_buf(data, size);
     }
-    spin(1);
+    spin(2);
     cs_disable(display->cs);
     // spin(1);
 }
