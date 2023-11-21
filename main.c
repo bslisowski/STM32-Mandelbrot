@@ -11,11 +11,13 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#define RED     0b0000000000011111 // 0x07E0u 
-#define GREEN   0b0000011111100000 // 0x001Fu
-#define BLUE    0b1111100000000000 // 0xF800u
-#define BLACK   0x0000
-#define WHITE   0xFFFF
+#define RED     (0b0000000000011111) // 0x07E0u 
+#define GREEN   (0b0000011111100000) // 0x001Fu
+#define BLUE    (0b1111100000000000) // 0xF800u
+#define BLACK   (0x0000)
+#define WHITE   (0xFFFF)
+
+#define COLOR(c) ((c) >> 8 & (c) << 8)
 
 struct st7789v_config cfg = {
     SPI1,
@@ -61,20 +63,50 @@ int init_tof(void)
 const uint16_t w = 24;
 const uint16_t h = 24;
 
-#define ABS(x) ((x < 0) ? x * -1.0f : x) 
+#define ABS(x) (((x) < 0) ? (x) * -1.0f : (x)) 
 
 static inline float map(float d, float fmin, float fmax, float tmin, float tmax) {
-    // float p = (d + xy) / ABS(fmax - fmin);
-    return d/ABS(fmax - fmin)*ABS(tmax - tmin); // tmin +  p * ABS(tmax - tmin); 
+    float p = (d + ((fmax - fmin) / 2)) / (fmax - fmin);
+    return tmin + (p * (tmax - tmin));
 }
 
+
+/*
+    {
+   -2.0f, 
+   0.47f,
+   -1.12f, 
+   1.12f
+  },
+  {
+    -0.82358f, 
+    -0.66248f,          
+    0.072733f,
+    0.180133f,
+  },
+  {
+    -0.726582279f, 
+    -0.571178189f,
+    0.394255111f, 
+    0.510516066f
+  },
+  {
+    -1.581986144f, 
+    -1.17295355f   
+    -0.143187067f, 
+   0.159609956f
+  },
+
+
+*/
 
 
 
 void mandlebrot(struct display_buffer *b) {
     // -2, 0.47
     // -1.12, 1.12
-    int iter_max = 500;
+    printf("************* START *************\r\n");
+    int iter_max = 750;
     float x_off = cfg.width / 2;
     float y_off = cfg.height / 2;
     uint16_t x = 0;
@@ -86,18 +118,9 @@ void mandlebrot(struct display_buffer *b) {
             b->x = x;
             uint16_t x_pos = x;
             uint16_t y_pos = y;
-            //printf("x = %d\ty = %d\r\n", x_pos, y_pos);
-            float xmin = 0;
-            float xmax = 0;
-            float ymin = 0;
-            float ymax = 0;
             for (int i = 0; i < b->width * b->height; i++) {
-                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -2.0f, 0.47f);
-                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, -1.12f, 1.12f);
-                if (x0 < xmin) xmin = x0;
-                if (x0 > xmax) xmax = x0;
-                if (y0 < ymin) ymin = y0;
-                if (y0 > ymax) ymax = y0;
+                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -0.726582279f, -0.571178189f);
+                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, 0.394255111f, 0.510516066f);
                 float x1 = 0.0f;
                 float y1 = 0.0f;
                 int iter = 0;
@@ -107,7 +130,15 @@ void mandlebrot(struct display_buffer *b) {
                     x1 = x_temp;
                     ++iter;
                 }
-                b->buffer[i] = (iter == iter_max) ? WHITE : BLACK;
+                b->buffer[i] = (iter < (iter_max/5)) 
+                                ? WHITE 
+                                : (iter < (2*iter_max/5))
+                                    ? RED
+                                    : (iter < (3*iter_max/5))
+                                        ? GREEN
+                                        : (iter < (4 * iter_max/5))
+                                            ? BLUE
+                                            : BLACK;
                 x_pos++;
                 if (x_pos >= b->x + b->width) { 
                     x_pos = b->x; 
@@ -115,9 +146,6 @@ void mandlebrot(struct display_buffer *b) {
                 }
             }
             draw(b);
-            //printf("\tmin:\tx0 = %f\ty0 = %f\r\n", (double)xmin, (double)ymin);
-            //printf("\tmax:\tx0 = %f\ty0 = %f\r\n", (double)xmax, (double)ymax);
-            //delay_ms(1000);
             x += b->width;
         }
         y += b->height;
@@ -125,12 +153,14 @@ void mandlebrot(struct display_buffer *b) {
 
 }
 
+// SEND TWO BYTES AT A TIME
+
 int main(void) {
     uart_init(UART_DEBUG, 115200);
     uint16_t pwm = PIN('B', 0);
     init_pwm(pwm, 100, 90);
     set_duty_cycle(pwm, 10);
-    delay_ms(5000);
+    //delay_ms(5000);
     //printf("hello\r\n");
     gpio_set_mode(D9, GPIO_MODE_OUTPUT);
     _gpio_write(D9, 0);
