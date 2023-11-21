@@ -3,8 +3,8 @@ CFLAGS  ?=  -O2 -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -g3 -Os -ffunction-sections -fdata-sections \
             -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include \
             -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
-LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lc -lrdimon -u _printf_float -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES = main.c syscalls.c sysinit.c hal/gpio.c hal/usart.c hal/pwm.c hal/spi.c hal/st7789v.c hal/i2c.c 
+LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lm -lc -lrdimon -u _printf_float -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
+SOURCES = main.c syscalls.c sysinit.c hal/gpio.c hal/usart.c hal/pwm.c hal/spi.c hal/st7789v.c hal/i2c.c fractals.c
 SOURCES += platform.c VL53L4CD_api.c
 SOURCES += cmsis_f3/Source/Templates/gcc/startup_stm32f303x8.s
 
