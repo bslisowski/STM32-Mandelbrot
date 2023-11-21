@@ -6,18 +6,12 @@
 #include "hal/spi.h"
 #include "hal/st7789v.h"
 #include "hal/i2c.h"
+#include "hal/font.h"
 #include "VL53L4CD_api.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
-
-#define RED     (0b0000000000011111) // 0x07E0u 
-#define GREEN   (0b0000011111100000) // 0x001Fu
-#define BLUE    (0b1111100000000000) // 0xF800u
-#define BLACK   (0x0000)
-#define WHITE   (0xFFFF)
-
-#define COLOR(c) ((c) >> 8 & (c) << 8)
+#include <math.h>
 
 struct st7789v_config cfg = {
     SPI1,
@@ -101,8 +95,50 @@ static inline float map(float d, float fmin, float fmax, float tmin, float tmax)
 */
 
 
-
 void mandlebrot(struct display_buffer *b) {
+    // -2, 0.47
+    // -1.12, 1.12
+    printf("************* START *************\r\n");
+    int iter_max = 1000;
+    float x_off = cfg.width / 2;
+    float y_off = cfg.height / 2;
+    uint16_t x = 0;
+    uint16_t y = 0;
+    while (y + b->height <= cfg.height) {
+        x = 0;
+        b->y = y;
+        while (x + b->width <= cfg.width) {
+            b->x = x;
+            uint16_t x_pos = x;
+            uint16_t y_pos = y;
+            for (int i = 0; i < b->width * b->height; i++) {
+                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -2.0f, 0.47f);
+                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, -1.12f, 1.12f);
+                float x1 = 0.0f;
+                float y1 = 0.0f;
+                int iter = 0;
+                while (x1*x1 < 4.0f && iter <= iter_max) {
+                    float x_temp = x1*x1 - y1*y1 + x0;
+                    y1 = 2*x1*y1 + y0;
+                    x1 = x_temp;
+                    ++iter;
+                }
+                b->buffer[i] = color_pixel(iter, iter_max);
+                x_pos++;
+                if (x_pos >= b->x + b->width) { 
+                    x_pos = b->x; 
+                    y_pos++;
+                }
+            }
+            draw(b);
+            x += b->width;
+        }
+        y += b->height;
+    }
+
+}
+
+void mandlebrot_opt(struct display_buffer *b) {
     // -2, 0.47
     // -1.12, 1.12
     printf("************* START *************\r\n");
@@ -119,26 +155,21 @@ void mandlebrot(struct display_buffer *b) {
             uint16_t x_pos = x;
             uint16_t y_pos = y;
             for (int i = 0; i < b->width * b->height; i++) {
-                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -0.726582279f, -0.571178189f);
-                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, 0.394255111f, 0.510516066f);
+                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -2.0f, 0.47f);
+                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, -1.12f, 1.12f);
                 float x1 = 0.0f;
                 float y1 = 0.0f;
+                float x2 = 0.0f;
+                float y2 = 0.0f;
                 int iter = 0;
-                while (x1*x1 < 4.0f && iter < iter_max) {
-                    float x_temp = x1*x1 - y1*y1 + x0;
-                    y1 = 2*x1*y1 + y0;
-                    x1 = x_temp;
-                    ++iter;
+                while (x2 + y2 <= 4.0f && iter < iter_max) {
+                    y1 = 2 * x1 * y1 + y0;
+                    x1 = x2 - y2 + x0;
+                    x2 = x1 * x1;
+                    y2 = y1 * y1;
+                    iter++; 
                 }
-                b->buffer[i] = (iter < (iter_max/5)) 
-                                ? WHITE 
-                                : (iter < (2*iter_max/5))
-                                    ? RED
-                                    : (iter < (3*iter_max/5))
-                                        ? GREEN
-                                        : (iter < (4 * iter_max/5))
-                                            ? BLUE
-                                            : BLACK;
+                b->buffer[i] = color_pixel(iter, iter_max);
                 x_pos++;
                 if (x_pos >= b->x + b->width) { 
                     x_pos = b->x; 
@@ -185,7 +216,21 @@ int main(void) {
     set_background(&db);
     db.x = 0;
     db.y = 0;
-    mandlebrot(&db);
+
+    uint32_t t0 = s_ticks;
+    // mandlebrot(&db);
+    // t0 = s_ticks - t0;
+    // delay_ms(1000);
+    // printf("%ld\r\n", t0);
+    // for (int i = w*h-1; i >= 0; i--) {
+    //         db.buffer[i] = colors[2];
+    // }
+    // set_background(&db);
+    // t0 = s_ticks;
+    mandlebrot_opt(&db);
+    t0 = s_ticks - t0;
+    delay_ms(1000);
+    printf("%ld\r\n", t0);
     for (;;) spin(1);
 
     db.y = 108;
