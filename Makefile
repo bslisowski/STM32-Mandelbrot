@@ -34,3 +34,6 @@ cmsis_f3:
 clean:
 	$(RM) firmware.* 
 
+dump:
+	arm-none-eabi-objdump -D firmware.elf > firmware.asm
+

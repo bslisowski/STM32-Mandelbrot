@@ -2,8 +2,8 @@
 #include "hal/st7789v.h"
 #include "fractals.h"
 #include "utils.h"
-#include "hal/font.h"
 #include <inttypes.h>
+#include <math.h>
 
 /*
     {
@@ -130,4 +130,53 @@ void mandlebrot_opt(struct display_buffer *b, uint16_t w, uint16_t h) {
         y += b->height;
     }
 
+}
+
+
+void julia(struct display_buffer *b, uint16_t w, uint16_t h, float cx, float cy) {
+    //static uint8_t prnt = 0;
+    printf("cx = %f\tcy = %f\r\n", (double)cx, (double)cy);
+    float x_off = w / 2;
+    float y_off = h / 2;
+    uint16_t x = 0;
+    uint16_t y = 0;
+    float r = get_radius(sqrtf(cx*cx + cy*cy));
+    float w_scale = quadratic(-1.0f * sqrtf(cx*cx + cy*cy));
+    float h_scale = w_scale;
+
+    while (y + b->height <= h) {
+        x = 0;
+        b->y = y;
+        while (x + b->width <= w) {
+            b->x = x;
+            uint16_t x_pos = x;
+            uint16_t y_pos = y;
+            printf("STARTING (%d, %d)\r\n", x_pos, y_pos);
+            for (int i = 0; i < b->width * b->height; i++) {
+                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -w_scale, w_scale);
+                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, -h_scale, h_scale);
+                int iter = 0;
+                int iter_max = 1000;
+
+                while (x0*x0 + y0*y0 <= r*r && iter < iter_max) {
+                    float x_temp = x0*x0 - y0*y0;
+                    y0 = 2 * x0 * y0 + cy;
+                    x0 = x_temp + cx;
+                    iter++;
+                } 
+                
+                b->buffer[i] = color_pixel(iter, iter_max);
+                x_pos++;
+                if (x_pos >= b->x + b->width) { 
+                    x_pos = b->x; 
+                    y_pos++;
+                }
+            }
+            draw(b);
+            printf("Hello \r\n");
+            x += b->width;
+        }
+        y += b->height;
+    }
+    //prnt++;
 }

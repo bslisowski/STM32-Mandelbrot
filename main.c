@@ -83,58 +83,67 @@ int main(void) {
         h
     };
     
-    uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
+    //uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
     for (int i = w*h-1; i >= 0; i--) {
-            db.buffer[i] = colors[1];
+            db.buffer[i] = BLACK;
     }
     set_background(&db);
     db.x = 0;
     db.y = 0;
+    //delay_ms(5000);
+    // uint32_t t0 = s_ticks;
 
-    uint32_t t0 = s_ticks;
-    // mandlebrot(&db);
-    // t0 = s_ticks - t0;
-    // delay_ms(1000);
-    // printf("%ld\r\n", t0);
-    // for (int i = w*h-1; i >= 0; i--) {
-    //         db.buffer[i] = colors[2];
-    // }
-    // set_background(&db);
-    // t0 = s_ticks;
-    mandlebrot_opt(&db, cfg.width, cfg.height);
-    t0 = s_ticks - t0;
+    float julias[11][2] = {
+        {-0.8f,0.156f},
+        {-0.4f,0.6f},
+        {-0.7269f,0.1889f},
+        {-0.123f,0.745f},
+        {-0.75f,0.001f},
+        {-0.391f,-0.587f},
+        {-1.0f,0.1f},
+        {0.360284f,0.100376f},
+        {-0.52f,0.57f},
+        {0.295f, 0.55f},
+        {-0.624f,0.435f}
+    };
+
     delay_ms(1000);
-    printf("%ld\r\n", t0);
-    for (;;) spin(1);
 
-    db.y = 108;
-    draw_number(&db, RED, 0);
-    _i2c_init(PIN('B', 6), PIN('B', 7));
-    init_tof();
-    
-    Dev_t 					dev = 0x52;
-	uint8_t 				status, isReady;
-	VL53L4CD_ResultsData_t 		results;
-    (void)status;
+    int j = 0;
     for (;;) {
-        
-        VL53L4CD_StartRanging(dev);
-        isReady = 0;
-        do {
-            status = VL53L4CD_CheckForDataReady(dev, &isReady);
-            delay_ms(5);
-        } while (!isReady);
-
-        VL53L4CD_ClearInterrupt(dev);
-        VL53L4CD_GetResult(dev, &results);
-        // printf("Status = %6u, Distance = %6u, Signal = %6u, Status = %d\r\n",
-        //     results.range_status,
-        //     results.distance_mm,
-        //     results.signal_per_spad_kcps, status);
-        VL53L4CD_StopRanging(dev);
-        
-        draw_number(&db, (uint16_t)((RED >> 8) | (RED << 8)), (uint32_t)results.distance_mm);
-        delay_ms(250);
+        julia(&db, cfg.width, cfg.height, julias[j][0], julias[j][1]);
+        j = (j + 1)%11;
+        delay_ms(10000);
     }
+
+    // db.y = 108;
+    // draw_number(&db, RED, 0);
+    // _i2c_init(PIN('B', 6), PIN('B', 7));
+    // init_tof();
+    
+    // Dev_t 					dev = 0x52;
+	// uint8_t 				status, isReady;
+	// VL53L4CD_ResultsData_t 		results;
+    // (void)status;
+    // for (;;) {
+        
+    //     VL53L4CD_StartRanging(dev);
+    //     isReady = 0;
+    //     do {
+    //         status = VL53L4CD_CheckForDataReady(dev, &isReady);
+    //         delay_ms(5);
+    //     } while (!isReady);
+
+    //     VL53L4CD_ClearInterrupt(dev);
+    //     VL53L4CD_GetResult(dev, &results);
+    //     // printf("Status = %6u, Distance = %6u, Signal = %6u, Status = %d\r\n",
+    //     //     results.range_status,
+    //     //     results.distance_mm,
+    //     //     results.signal_per_spad_kcps, status);
+    //     VL53L4CD_StopRanging(dev);
+        
+    //     draw_number(&db, (uint16_t)((RED >> 8) | (RED << 8)), (uint32_t)results.distance_mm);
+    //     delay_ms(250);
+    // }
     return 0;
 }

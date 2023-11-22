@@ -70,7 +70,7 @@ static inline void spi_write_byte(uint8_t byte) {
 static inline void spi_write_buf(uint8_t *buf, size_t len) {
     while (len-- > 0) spi_write_byte(*buf++);
     while ((SPI1->SR & SPI_SR_TXE_Msk) == 0) spin(1);
-    while ((SPI1->SR & SPI_SR_BSY_Msk) == 0) spin(1);
+    //while ((SPI1->SR & SPI_SR_BSY_Msk) == 0) spin(1);
     uint32_t temp = SPI1->DR;
     temp = SPI1->SR;
     (void)temp;
