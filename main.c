@@ -106,14 +106,25 @@ int main(void) {
         {0.295f, 0.55f},
         {-0.624f,0.435f}
     };
+    (void)julias;
 
-    delay_ms(1000);
-
-    int j = 0;
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    // int j = 11;
     for (;;) {
-        julia(&db, cfg.width, cfg.height, julias[j][0], julias[j][1]);
-        j = (j + 1)%11;
-        delay_ms(10000);
+        // if (j == 11) {
+        //     mandlebrot_zoom(&db, cfg.width, cfg.height);
+        // } 
+        // else {
+        //     julia(&db, cfg.width, cfg.height, julias[j][0], julias[j][1]);
+        // }
+        // j = (j + 1)%12;
+        delay_ms(3000);
+        zoom(ZOOM_IN);
+        mandlebrot_zoom(&db, cfg.width, cfg.height);
+        delay_ms(3000);
+        zoom(ZOOM_OUT);
+        mandlebrot_zoom(&db, cfg.width, cfg.height);
+        
     }
 
     // db.y = 108;
