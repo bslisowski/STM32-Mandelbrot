@@ -10,6 +10,7 @@
 #include "fractals.h"
 #include "VL53L4CD_api.h"
 #include "hal/button.h"
+#include "utils.h"
 #include <stdio.h>
 #include <inttypes.h>
 #include <math.h>
@@ -40,9 +41,25 @@ struct st7789v_config cfg = {
     { 0xCD, 0x08, 0x14},
 };
 
+// float julias[11][2] = {
+//         {-0.8f,0.156f},
+//         {-0.4f,0.6f},
+//         {-0.7269f,0.1889f},
+//         {-0.123f,0.745f},
+//         {-0.75f,0.001f},
+//         {-0.391f,-0.587f},
+//         {-1.0f,0.1f},
+//         {0.360284f,0.100376f},
+//         {-0.52f,0.57f},
+//         {0.295f, 0.55f},
+//         {-0.624f,0.435f}
+//     };
+
 int init_tof(void)
 {
-    _gpio_write(D9, 1);
+    _gpio_write(A0, 0);
+    delay_ms(1);
+    _gpio_write(A0, 1);
     delay_ms(1);
 	Dev_t 					dev = 0x52;
 	uint8_t 				status;
@@ -67,6 +84,8 @@ struct display_buffer db = {
     HEIGHT
 };
 
+uint8_t zoom_mode = 0;
+uint8_t zoom_val = 0;
 // SEND TWO BYTES AT A TIME
 
 void move_left_cb(void) {
@@ -90,26 +109,31 @@ void move_down_cb(void) {
 }
 
 void zoom_cb(void) {
-    zoom(ZOOM_IN);
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    if (zoom_mode) {
+        zoom(ZOOM_VAL, zoom_val);
+        mandlebrot_zoom(&db, cfg.width, cfg.height);
+    }
+    else {
+        for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
+            db.buffer[i] = WHITE;
+        }
+        set_background(&db);
+        draw_number(&db, BLACK, 0);
+    }
+    zoom_mode = !zoom_mode;
 }
 
 int main(void) {
     uart_init(UART_DEBUG, 115200);
+    
     uint16_t pwm = PIN('B', 0);
     init_pwm(pwm, 100, 90);
     set_duty_cycle(pwm, 10);
-    //delay_ms(5000);
-    //printf("hello\r\n");
-    gpio_set_mode(D9, GPIO_MODE_OUTPUT);
-    _gpio_write(D9, 0);
-
     init_spi(MISO, MOSI, SCK);
-
-    
     init_st7789v(&cfg);
-    // uint16_t buff[WIDTH * HEIGHT];
-    // db.buffer = (uint16_t *)buff;
+    
+    _i2c_init(PIN('B', 6), PIN('B', 7));
+    init_tof();
     
     button left_btn = {
         D2,
@@ -152,7 +176,7 @@ int main(void) {
     init_btn(&down_btn);
     
     button zoom_btn = {
-        A0,
+        A1,
         ACTIVE_LOW,
         1,
         0,
@@ -160,85 +184,58 @@ int main(void) {
         zoom_cb
     };
     init_btn(&zoom_btn);
-
-    //uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
+    
     for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
             db.buffer[i] = BLACK;
     }
     set_background(&db);
     db.x = 0;
     db.y = 0;
-    //delay_ms(5000);
-    // uint32_t t0 = s_ticks;
-
-    float julias[11][2] = {
-        {-0.8f,0.156f},
-        {-0.4f,0.6f},
-        {-0.7269f,0.1889f},
-        {-0.123f,0.745f},
-        {-0.75f,0.001f},
-        {-0.391f,-0.587f},
-        {-1.0f,0.1f},
-        {0.360284f,0.100376f},
-        {-0.52f,0.57f},
-        {0.295f, 0.55f},
-        {-0.624f,0.435f}
-    };
-    (void)julias;
     
-
     mandlebrot_zoom(&db, cfg.width, cfg.height);
-    // uint16_t btn_state = _gpio_read(D2);
-    // uint16_t btn_state_last = btn_state;
-    // gpio_set_mode(D2, GPIO_MODE_INPUT);
-    // gpio_set_pull(D2, GPIO_PULLUP);
 
-    // IN IN LEFT IN
-    // int j = 11;
+    Dev_t 					dev = 0x52;
+	uint8_t 				status, isReady;
+	VL53L4CD_ResultsData_t 		results;
+    (void)status;
+
     for (;;) {
-        update_btn(&left_btn);
-        update_btn(&right_btn);
-        update_btn(&up_btn);
-        update_btn(&down_btn);
         update_btn(&zoom_btn);
-        // btn_state = _gpio_read(D2);
-        // if (btn_state != btn_state_last) {
-        //     if (btn_state) {
-        //         move(MOVE_LEFT);
-        //         mandlebrot_zoom(&db, cfg.width, cfg.height);
-        //     }
-        //     btn_state_last = btn_state;
-        // }
+        if (zoom_mode) {
+            uint8_t index = 10;
+            uint32_t v = 0;
+            while (index-- && zoom_mode) {
+                VL53L4CD_StartRanging(dev);
+                isReady = 0;
+                do {
+                    status = VL53L4CD_CheckForDataReady(dev, &isReady);
+                    delay_ms(5);
+                    update_btn(&zoom_btn);
+                } while (!isReady);
+
+                VL53L4CD_ClearInterrupt(dev);
+                VL53L4CD_GetResult(dev, &results);
+                VL53L4CD_StopRanging(dev);
+                v += (uint32_t)results.distance_mm;
+                delay_ms(1);
+                update_btn(&zoom_btn);
+            }
+            if (!zoom_mode) continue;
+            v /= 10;
+            if (v < 15) v = 15;
+            if (v > 300) v = 300;
+            printf("%ld\r\n", v);
+            float temp = map((float)v, 15.0f, 300.0f, 20.0f, 0.0f);
+            zoom_val = (uint8_t)temp;  
+            draw_number(&db, BLACK, (uint32_t)zoom_val);
+        }
+        else {
+            update_btn(&left_btn);
+            update_btn(&right_btn);
+            update_btn(&up_btn);
+            update_btn(&down_btn);
+        }
     }
-
-    // db.y = 108;
-    // draw_number(&db, RED, 0);
-    // _i2c_init(PIN('B', 6), PIN('B', 7));
-    // init_tof();
     
-    // Dev_t 					dev = 0x52;
-	// uint8_t 				status, isReady;
-	// VL53L4CD_ResultsData_t 		results;
-    // (void)status;
-    // for (;;) {
-        
-    //     VL53L4CD_StartRanging(dev);
-    //     isReady = 0;
-    //     do {
-    //         status = VL53L4CD_CheckForDataReady(dev, &isReady);
-    //         delay_ms(5);
-    //     } while (!isReady);
-
-    //     VL53L4CD_ClearInterrupt(dev);
-    //     VL53L4CD_GetResult(dev, &results);
-    //     // printf("Status = %6u, Distance = %6u, Signal = %6u, Status = %d\r\n",
-    //     //     results.range_status,
-    //     //     results.distance_mm,
-    //     //     results.signal_per_spad_kcps, status);
-    //     VL53L4CD_StopRanging(dev);
-        
-    //     draw_number(&db, (uint16_t)((RED >> 8) | (RED << 8)), (uint32_t)results.distance_mm);
-    //     delay_ms(250);
-    // }
     return 0;
 }

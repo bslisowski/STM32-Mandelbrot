@@ -8,14 +8,13 @@
 #define MOVE_RIGHT	3
 #define ZOOM_OUT 	0
 #define ZOOM_IN		1
+#define ZOOM_VAL	2
 
 void move(uint8_t dir);
-void zoom(uint8_t dir);
+void zoom(uint8_t dir, uint8_t val);
 void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h);
 void mandlebrot(struct display_buffer *b, uint16_t w, uint16_t h);
 void julia(struct display_buffer *b, uint16_t w, uint16_t h, float cx, float cy);
-
-// 20
 
 static rgb_t gradient[] = {
     (rgb_t){0, 7, 10},

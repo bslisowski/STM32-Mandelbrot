@@ -46,13 +46,31 @@ void move(uint8_t dir) {
     }
 }
 
-void zoom(uint8_t dir) {
-    if (dir) {
-        if (_zoom != ZOOM_LIMIT) _zoom = _zoom << 1;
+// val = 0 to 20 => 2^val
+void zoom(uint8_t dir, uint8_t val) {
+    switch(dir) {
+        case ZOOM_IN:
+            if (_zoom != ZOOM_LIMIT) _zoom = _zoom << 1;
+            break;
+        case ZOOM_OUT:
+            if (_zoom != 1) _zoom = _zoom >> 1;
+            break;
+        case ZOOM_VAL:
+            _zoom = (1ul << val);
+            break;
+        default:
+            break;
     }
-    else {
-        if (_zoom != 1) _zoom = _zoom >> 1;
-    }
+    // if (val) {
+    //     _zoom = (1ul << (val - 1));
+    //     return;
+    // }
+    // if (dir) {
+    //     if (_zoom != ZOOM_LIMIT) _zoom = _zoom << 1;
+    // }
+    // else {
+    //     if (_zoom != 1) _zoom = _zoom >> 1;
+    // }
 }
 
 

@@ -15,10 +15,6 @@ struct button {
 };
 typedef struct button button;
 
-
-// state = (state << 1) | read(btn) | 1111111000000000      0xfe00
-// return (state == 1111111100000000)                       0xff00
-
 void update_btn(button *btn);
 void init_btn(button *btn);
 
