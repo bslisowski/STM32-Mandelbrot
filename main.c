@@ -9,6 +9,7 @@
 #include "hal/font.h"
 #include "fractals.h"
 #include "VL53L4CD_api.h"
+#include "hal/button.h"
 #include <stdio.h>
 #include <inttypes.h>
 #include <math.h>
@@ -54,10 +55,29 @@ int init_tof(void)
 	return status;
 }
 
-const uint16_t w = 24;
-const uint16_t h = 24;
+#define WIDTH 24
+#define HEIGHT 24
+uint16_t buff[WIDTH * HEIGHT];
+
+struct display_buffer db = {
+    (uint16_t *)buff,
+    0,
+    0,
+    WIDTH,
+    HEIGHT
+};
 
 // SEND TWO BYTES AT A TIME
+
+void move_left_cb(void) {
+    move(MOVE_LEFT);
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+}
+
+void move_right_cb(void) {
+    move(MOVE_RIGHT);
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+}
 
 int main(void) {
     uart_init(UART_DEBUG, 115200);
@@ -73,17 +93,31 @@ int main(void) {
 
     
     init_st7789v(&cfg);
-    uint16_t buff[w*h];
-    struct display_buffer db = {
-        (uint16_t *)buff,
-        0,
-        0,
-        w,
-        h
-    };
+    // uint16_t buff[WIDTH * HEIGHT];
+    // db.buffer = (uint16_t *)buff;
     
+    button left_btn = {
+        D2,
+        ACTIVE_LOW,
+        1,
+        0,
+        0,
+        move_left_cb
+    };
+    init_btn(&left_btn);
+
+    button right_btn = {
+        D7,
+        ACTIVE_LOW,
+        1,
+        0,
+        0,
+        move_right_cb
+    };
+    init_btn(&right_btn);
+
     //uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
-    for (int i = w*h-1; i >= 0; i--) {
+    for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
             db.buffer[i] = BLACK;
     }
     set_background(&db);
@@ -106,37 +140,27 @@ int main(void) {
         {-0.624f,0.435f}
     };
     (void)julias;
-    gpio_set_mode(D2, GPIO_MODE_INPUT);
-    gpio_set_pull(D2, GPIO_PULLUP);
+    
 
     mandlebrot_zoom(&db, cfg.width, cfg.height);
-    uint16_t btn_state = _gpio_read(D2);
-    uint16_t btn_state_last = btn_state;
+    // uint16_t btn_state = _gpio_read(D2);
+    // uint16_t btn_state_last = btn_state;
+    // gpio_set_mode(D2, GPIO_MODE_INPUT);
+    // gpio_set_pull(D2, GPIO_PULLUP);
 
     // IN IN LEFT IN
     // int j = 11;
     for (;;) {
-        // if (j == 11) {
-        //     mandlebrot_zoom(&db, cfg.width, cfg.height);
-        // } 
-        // else {
-        //     julia(&db, cfg.width, cfg.height, julias[j][0], julias[j][1]);
+        update_btn(&left_btn);
+        update_btn(&right_btn);
+        // btn_state = _gpio_read(D2);
+        // if (btn_state != btn_state_last) {
+        //     if (btn_state) {
+        //         move(MOVE_LEFT);
+        //         mandlebrot_zoom(&db, cfg.width, cfg.height);
+        //     }
+        //     btn_state_last = btn_state;
         // }
-        // j = (j + 1)%12;
-        //delay_ms(3000);
-        // zoom(ZOOM_IN);
-        // mandlebrot_zoom(&db, cfg.width, cfg.height);
-        // delay_ms(3000);
-        // zoom(ZOOM_OUT);
-        // mandlebrot_zoom(&db, cfg.width, cfg.height);
-        btn_state = _gpio_read(D2);
-        if (btn_state != btn_state_last) {
-            if (btn_state) {
-                move(MOVE_LEFT);
-                mandlebrot_zoom(&db, cfg.width, cfg.height);
-            }
-            btn_state_last = btn_state;
-        }
     }
 
     // db.y = 108;
