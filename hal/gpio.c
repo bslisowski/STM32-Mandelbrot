@@ -25,20 +25,18 @@ int gpio_init(gpio_config *config) {
     return 0;
 }
 
-int gpio_write(uint16_t pin, bool val) {
+int gpio_write(uint16_t pin, uint16_t val) {
     if (!IS_GPIO_ALL_INSTANCE(GPIO(PINBANK(pin)))) {
-        return -1;
+        return 1;
     }
     _gpio_write(pin, val);
 
     return 0;
 }
 
-int gpio_read(uint16_t pin) {
+uint16_t gpio_read(uint16_t pin) {
     if (!IS_GPIO_ALL_INSTANCE(GPIO(PINBANK(pin)))) {
-        return -1;
+        return 0;
     }
-    _gpio_read(pin);
-
-    return 0;
+    return _gpio_read(pin);
 }

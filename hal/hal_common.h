@@ -2,7 +2,6 @@
 #define _HAL_COMMON_H_
 
 #include <inttypes.h>
-#include <stdbool.h>
 #include "stm32f303x8.h"
 
 #define BIT(x) (1U << (x))
@@ -29,12 +28,12 @@ static inline void delay_ms(uint32_t ms) {
     while (s_ticks < t) (void) 0;
 }
 
-static inline bool timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
+static inline uint16_t timer_expired(uint32_t *t, uint32_t prd, uint32_t now) {
     if (now + prd < *t) *t = 0;
     if (*t == 0) *t = now + prd;
-    if (*t > now) return false;
+    if (*t > now) return 0;
     *t = (now - *t) > prd ? now + prd : *t + prd;
-    return true; 
+    return 1; 
 }
 
 #endif

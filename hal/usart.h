@@ -26,6 +26,6 @@ static inline void uart_write_buf(USART_TypeDef *uart, char *buf, size_t len) {
     while (len-- > 0) uart_write_byte(uart, *(uint8_t *) buf++);
 }
 
-bool uart_init(USART_TypeDef *uart, unsigned long baud);
+uint16_t uart_init(USART_TypeDef *uart, unsigned long baud);
 
 #endif

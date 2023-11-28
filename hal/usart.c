@@ -1,6 +1,6 @@
 #include "usart.h"
 
-bool uart_init(USART_TypeDef *uart, unsigned long baud) {
+uint16_t uart_init(USART_TypeDef *uart, unsigned long baud) {
     uint16_t rx = 0, tx = 0;
     uint32_t freq = 0;
      
@@ -17,7 +17,7 @@ bool uart_init(USART_TypeDef *uart, unsigned long baud) {
         rx = PIN('A', 15), tx = PIN('A', 2);
     }
     else {
-        return false;
+        return 0;
     }
 
     gpio_config pin_config = { 
@@ -41,5 +41,5 @@ bool uart_init(USART_TypeDef *uart, unsigned long baud) {
     uart->CR1 = 0;
     uart->BRR = freq / baud;
     uart->CR1 |= USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
-    return true;
+    return 1;
 }

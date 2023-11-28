@@ -34,10 +34,10 @@ void move(uint8_t dir) {
             _cy -= unit;
             break;
         case MOVE_LEFT:
-            _cx += unit;
+            _cx -= unit;
             break;
         case MOVE_RIGHT:
-            _cx -= unit;
+            _cx += unit;
             break;  
         default:
             break;

@@ -10,7 +10,6 @@
 #include "fractals.h"
 #include "VL53L4CD_api.h"
 #include <stdio.h>
-#include <stdbool.h>
 #include <inttypes.h>
 #include <math.h>
 
@@ -107,8 +106,14 @@ int main(void) {
         {-0.624f,0.435f}
     };
     (void)julias;
+    gpio_set_mode(D2, GPIO_MODE_INPUT);
+    gpio_set_pull(D2, GPIO_PULLUP);
 
     mandlebrot_zoom(&db, cfg.width, cfg.height);
+    uint16_t btn_state = _gpio_read(D2);
+    uint16_t btn_state_last = btn_state;
+
+    // IN IN LEFT IN
     // int j = 11;
     for (;;) {
         // if (j == 11) {
@@ -118,13 +123,20 @@ int main(void) {
         //     julia(&db, cfg.width, cfg.height, julias[j][0], julias[j][1]);
         // }
         // j = (j + 1)%12;
-        delay_ms(3000);
-        zoom(ZOOM_IN);
-        mandlebrot_zoom(&db, cfg.width, cfg.height);
-        delay_ms(3000);
-        zoom(ZOOM_OUT);
-        mandlebrot_zoom(&db, cfg.width, cfg.height);
-        
+        //delay_ms(3000);
+        // zoom(ZOOM_IN);
+        // mandlebrot_zoom(&db, cfg.width, cfg.height);
+        // delay_ms(3000);
+        // zoom(ZOOM_OUT);
+        // mandlebrot_zoom(&db, cfg.width, cfg.height);
+        btn_state = _gpio_read(D2);
+        if (btn_state != btn_state_last) {
+            if (btn_state) {
+                move(MOVE_LEFT);
+                mandlebrot_zoom(&db, cfg.width, cfg.height);
+            }
+            btn_state_last = btn_state;
+        }
     }
 
     // db.y = 108;

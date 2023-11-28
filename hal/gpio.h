@@ -60,12 +60,19 @@ static inline void gpio_set_af(uint16_t pin, uint8_t af_num) {
     gpio->AFR[n >> 3] |= ((uint32_t) af_num) << ((n & 7) * 4);
 }
 
-static inline void _gpio_write(uint16_t pin, bool val) {
+static inline void gpio_set_pull(uint16_t pin, uint8_t pull) {
+    GPIO_TypeDef *gpio = GPIO(PINBANK(pin));
+    int n = PINNO(pin);
+    gpio->PUPDR &= ~(3U << (n * 2));
+    gpio->PUPDR |= ((pull & 3U) << (n * 2));
+}
+
+static inline void _gpio_write(uint16_t pin, uint16_t val) {
     GPIO_TypeDef *gpio = GPIO(PINBANK(pin));
     gpio->BSRR = (1U << PINNO(pin)) << (val ? 0 : 16);
 }
 
-static inline bool _gpio_read(uint16_t pin) {
+static inline uint16_t _gpio_read(uint16_t pin) {
     GPIO_TypeDef *gpio = GPIO(PINBANK(pin));
     return 1 & (gpio->IDR >> PINNO(pin));
 }
@@ -81,7 +88,7 @@ static inline void _gpio_init(gpio_config *config) {
 }
 
 int gpio_init(gpio_config *config);
-int gpio_write(uint16_t pin, bool val);
-int gpio_read(uint16_t pin);
+int gpio_write(uint16_t pin, uint16_t val);
+uint16_t gpio_read(uint16_t pin);
 
 #endif
