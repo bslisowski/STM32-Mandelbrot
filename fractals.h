@@ -15,7 +15,7 @@ void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h);
 void mandlebrot(struct display_buffer *b, uint16_t w, uint16_t h);
 void julia(struct display_buffer *b, uint16_t w, uint16_t h, float cx, float cy);
 
-
+// 20
 
 static rgb_t gradient[] = {
     (rgb_t){0, 7, 10},

@@ -5,6 +5,8 @@
 #include <inttypes.h>
 #include <math.h>
 
+#define ZOOM_LIMIT 1048576
+
 static const float _square = 3.0f;
 // static const float _x_lower = -2.0f;
 // static const float _x_upper =  1.0f;
@@ -12,15 +14,15 @@ static const float _square = 3.0f;
 // static const float _y_upper =  1.5f; 
 static float _cx = -0.5f;
 static float _cy = 0.0f;
-static uint16_t _zoom = 1;
+static uint32_t _zoom = 1;
 
-#define XMIN (_cx - ((_square/_zoom)/2))
-#define XMAX (_cx + ((_square/_zoom)/2))
-#define YMIN (_cy - ((_square/_zoom)/2))
-#define YMAX (_cy + ((_square/_zoom)/2))
+#define XMIN (_cx - ((_square/(float)_zoom)/2))
+#define XMAX (_cx + ((_square/(float)_zoom)/2))
+#define YMIN (_cy - ((_square/(float)_zoom)/2))
+#define YMAX (_cy + ((_square/(float)_zoom)/2))
 
 static inline float get_unit() {
-    float _sq = _square / _zoom;
+    float _sq = _square / (float)_zoom;
     return _sq / 24;
 }
 
@@ -46,7 +48,7 @@ void move(uint8_t dir) {
 
 void zoom(uint8_t dir) {
     if (dir) {
-        if (_zoom != 65535) _zoom = _zoom << 1;
+        if (_zoom != ZOOM_LIMIT) _zoom = _zoom << 1;
     }
     else {
         if (_zoom != 1) _zoom = _zoom >> 1;

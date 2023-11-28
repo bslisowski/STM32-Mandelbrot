@@ -79,6 +79,21 @@ void move_right_cb(void) {
     mandlebrot_zoom(&db, cfg.width, cfg.height);
 }
 
+void move_up_cb(void) {
+    move(MOVE_UP);
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+}
+
+void move_down_cb(void) {
+    move(MOVE_DOWN);
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+}
+
+void zoom_cb(void) {
+    zoom(ZOOM_IN);
+    mandlebrot_zoom(&db, cfg.width, cfg.height);
+}
+
 int main(void) {
     uart_init(UART_DEBUG, 115200);
     uint16_t pwm = PIN('B', 0);
@@ -115,6 +130,36 @@ int main(void) {
         move_right_cb
     };
     init_btn(&right_btn);
+
+    button up_btn = {
+        D8,
+        ACTIVE_LOW,
+        1,
+        0,
+        0,
+        move_up_cb
+    };
+    init_btn(&up_btn);
+
+    button down_btn = {
+        D9,
+        ACTIVE_LOW,
+        1,
+        0,
+        0,
+        move_down_cb
+    };
+    init_btn(&down_btn);
+    
+    button zoom_btn = {
+        A0,
+        ACTIVE_LOW,
+        1,
+        0,
+        0,
+        zoom_cb
+    };
+    init_btn(&zoom_btn);
 
     //uint16_t colors[] = { WHITE, RED, GREEN, BLUE, BLACK };
     for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
@@ -153,6 +198,9 @@ int main(void) {
     for (;;) {
         update_btn(&left_btn);
         update_btn(&right_btn);
+        update_btn(&up_btn);
+        update_btn(&down_btn);
+        update_btn(&zoom_btn);
         // btn_state = _gpio_read(D2);
         // if (btn_state != btn_state_last) {
         //     if (btn_state) {
