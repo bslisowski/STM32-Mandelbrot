@@ -2,19 +2,36 @@
 #include <stdio.h>
 #include "font.h"
 #include <math.h>
+#include <ctype.h>
+
+
+static inline void draw_char(struct display_buffer *b, uint16_t color, const uint8_t *arr) {
+    for (int i = 0; i < 72; i++) {
+        for (int j = 0; j < 8; j++) {
+            b->buffer[i*8 + j] = arr[i] & (1 << (7 - j)) ? color : 0xFFFF;
+        }
+    }
+    _draw(b);
+}
+
+int draw_letter(struct display_buffer *b, uint16_t color, char letter) {
+    char t = (char)toupper(letter);
+    // printf("%c\r\n", t);
+    if (t < 'A' || t > 'Z') {
+        return -1;
+    }
+    const uint8_t *a = _alpha_arr[t - 'A'];
+    draw_char(b, color, a);
+    return 0;
+}
+
 
 int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit) {
     if (digit > 9) {
         return -1;
     }
     const uint8_t *d = _digit_arr[digit];
-    for (int i = 0; i < 72; i++) {
-        for (int j = 0; j < 8; j++) {
-            b->buffer[i*8 + j] = d[i] & (1 << (7 - j)) ? color : 0xFFFF;
-        }
-    }
-
-    _draw(b);
+    draw_char(b, color, d);
     return 0;
 }
 

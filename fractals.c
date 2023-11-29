@@ -130,6 +130,7 @@ void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h) {
 // -0.501123f, -0.058426f
 
 void mandlebrot(struct display_buffer *b, uint16_t w, uint16_t h) {
+    (void)_alpha_arr;
     // -2, 0.47
     // -1.12, 1.12
     printf("************* START *************\r\n");

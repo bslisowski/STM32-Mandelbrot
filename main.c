@@ -124,6 +124,7 @@ void zoom_cb(void) {
 }
 
 int main(void) {
+    (void)_alpha_arr;
     uart_init(UART_DEBUG, 115200);
     
     uint16_t pwm = PIN('B', 0);
@@ -131,6 +132,32 @@ int main(void) {
     set_duty_cycle(pwm, 10);
     init_spi(MISO, MOSI, SCK);
     init_st7789v(&cfg);
+
+    for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
+            db.buffer[i] = WHITE;
+    }
+    set_background(&db);
+    db.x = 0;
+    db.y = 0;
+    char letter = 'A';
+
+    while (db.y < cfg.height) {
+        db.x = 0;
+        while (db.x < cfg.width) {
+            draw_letter(&db, GREEN, letter);
+            letter = (char)((int)letter + 1);
+             
+            if ((int)letter > (int)'Z') {
+                
+                while(1) {
+                    spin(10);
+                }
+            }
+            db.x += (uint16_t)(db.width*2u);
+        }
+        db.y += db.height;
+    }
+    return 0;
     
     _i2c_init(PIN('B', 6), PIN('B', 7));
     init_tof();

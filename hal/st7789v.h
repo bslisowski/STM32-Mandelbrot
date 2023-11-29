@@ -173,6 +173,8 @@ static inline void clear_line(struct display_buffer *b) {
     }
 }
 
+int draw_letter(struct display_buffer *b, uint16_t color, char letter);
+
 int draw_digit(struct display_buffer *b, uint16_t color, uint8_t digit);
 
 int draw_number(struct display_buffer *b, uint16_t color, uint32_t num);
