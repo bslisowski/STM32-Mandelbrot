@@ -123,6 +123,8 @@ void zoom_cb(void) {
     zoom_mode = !zoom_mode;
 }
 
+char str[50];
+
 int main(void) {
     (void)_alpha_arr;
     uart_init(UART_DEBUG, 115200);
@@ -139,6 +141,10 @@ int main(void) {
     set_background(&db);
     db.x = 0;
     db.y = 0;
+    sprintf(str, "Hello\nWorld\n%f", (double)123.456f);
+    dprint(&db, GREEN, str);
+    return 0;
+
     char letter = 'A';
 
     while (db.y < cfg.height) {

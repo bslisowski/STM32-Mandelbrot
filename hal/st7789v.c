@@ -14,14 +14,53 @@ static inline void draw_char(struct display_buffer *b, uint16_t color, const uin
     _draw(b);
 }
 
+int dprint(struct display_buffer *b, uint16_t color, char *str) {
+    char temp = *(str++);
+    while (temp != '\0') {
+        if (isalpha(temp)) {
+            temp = (char)toupper(temp);
+            const uint8_t *c = _alpha_arr[temp - 'A'];
+            draw_char(b, color, c);
+            b->x += b->width;
+        }
+        else if (isdigit(temp)) {
+            const uint8_t *c = _digit_arr[temp - '0'];
+            draw_char(b, color, c);
+            b->x += b->width;
+        }
+        else if (temp == '.') {
+            draw_char(b, color, _symbol_period);
+            b->x += b->width;
+        }
+        else if (temp == '\n') {
+            b->x = 0;
+            b->y += b->height;
+        }
+        else if (temp == ' ') {
+            b->x += b->width;
+        }
+
+        if (b->x >= display->width) {
+            b->x = 0;
+            b->y += b->height;
+        }
+        if (b->y >= display->height) {
+            b->y = 0;
+        }
+        temp = *(str++);
+    }
+    
+    return 0;
+}
+
 int draw_letter(struct display_buffer *b, uint16_t color, char letter) {
     char t = (char)toupper(letter);
     // printf("%c\r\n", t);
     if (t < 'A' || t > 'Z') {
         return -1;
     }
-    const uint8_t *a = _alpha_arr[t - 'A'];
-    draw_char(b, color, a);
+    const uint8_t *c = _alpha_arr[t - 'A'];
+    draw_char(b, color, c);
     return 0;
 }
 
