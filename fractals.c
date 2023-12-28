@@ -8,10 +8,6 @@
 #define ZOOM_LIMIT 1048576
 
 static const float _square = 3.0f;
-// static const float _x_lower = -2.0f;
-// static const float _x_upper =  1.0f;
-// static const float _y_lower = -1.5f;
-// static const float _y_upper =  1.5f; 
 static float _cx = -0.5f;
 static float _cy = 0.0f;
 static uint32_t _zoom = 1;
@@ -61,24 +57,11 @@ void zoom(uint8_t dir, uint8_t val) {
         default:
             break;
     }
-    // if (val) {
-    //     _zoom = (1ul << (val - 1));
-    //     return;
-    // }
-    // if (dir) {
-    //     if (_zoom != ZOOM_LIMIT) _zoom = _zoom << 1;
-    // }
-    // else {
-    //     if (_zoom != 1) _zoom = _zoom >> 1;
-    // }
 }
 
 
 
-void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h) {
-    // -2, 0.47
-    // -1.12, 1.12
-    printf("************* START *************\r\n");
+void mandlebrot(struct display_buffer *b, uint16_t w, uint16_t h) {
     int iter_max = 750;
     float x_off = w / 2;
     float y_off = h / 2;
@@ -106,10 +89,6 @@ void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h) {
                     y2 = y1 * y1;
                     iter++; 
                 }
-                // int new_iter = 0;
-                // float log_zn = logf(x2 + y2) / 2.0f;
-                // new_iter = (int)( logf(log_zn / logf(2.0f)) / logf(2.0f) );
-                // b->buffer[i] = color_pixel(iter + 1 - new_iter, iter_max);
                 b->buffer[i] = color_pixel(iter, iter_max);
                 x_pos++;
                 if (x_pos >= b->x + b->width) { 
@@ -122,68 +101,22 @@ void mandlebrot_zoom(struct display_buffer *b, uint16_t w, uint16_t h) {
         }
         y += b->height;
     }
-
 }
 
 
-// -1.34007f, -0.742322f
-// -0.501123f, -0.058426f
-
-void mandlebrot(struct display_buffer *b, uint16_t w, uint16_t h) {
-    (void)_alpha_arr;
-    // -2, 0.47
-    // -1.12, 1.12
-    printf("************* START *************\r\n");
-    int iter_max = 750;
-    float x_off = w / 2;
-    float y_off = h / 2;
-    uint16_t x = 0;
-    uint16_t y = 0;
-    while (y + b->height <= h) {
-        x = 0;
-        b->y = y;
-        while (x + b->width <= w) {
-            b->x = x;
-            uint16_t x_pos = x;
-            uint16_t y_pos = y;
-    //         -0.82358f, 
-    // -0.66248f,          
-    // 0.072733f,
-    // 0.180133f,
-            for (int i = 0; i < b->width * b->height; i++) {
-                float x0 = map((float)x_pos - x_off, -1.0f * x_off, x_off, -2.0f, 1.0f);
-                float y0 = map((float)y_pos - y_off , -1.0f * y_off, y_off, -1.5f, 1.5f);
-                float x1 = 0.0f;
-                float y1 = 0.0f;
-                float x2 = 0.0f;
-                float y2 = 0.0f;
-                int iter = 0;
-                while (x2 + y2 <= 4.0f && iter < iter_max) {
-                    y1 = 2 * x1 * y1 + y0;
-                    x1 = x2 - y2 + x0;
-                    x2 = x1 * x1;
-                    y2 = y1 * y1;
-                    iter++; 
-                }
-                // int new_iter = 0;
-                // float log_zn = logf(x2 + y2) / 2.0f;
-                // new_iter = (int)( logf(log_zn / logf(2.0f)) / logf(2.0f) );
-                // b->buffer[i] = color_pixel(iter + 1 - new_iter, iter_max);
-                b->buffer[i] = color_pixel(iter, iter_max);
-                x_pos++;
-                if (x_pos >= b->x + b->width) { 
-                    x_pos = b->x; 
-                    y_pos++;
-                }
-            }
-            draw(b);
-            x += b->width;
-        }
-        y += b->height;
-    }
-
-}
-
+// float julias[11][2] = {
+//         {-0.8f,0.156f},
+//         {-0.4f,0.6f},
+//         {-0.7269f,0.1889f},
+//         {-0.123f,0.745f},
+//         {-0.75f,0.001f},
+//         {-0.391f,-0.587f},
+//         {-1.0f,0.1f},
+//         {0.360284f,0.100376f},
+//         {-0.52f,0.57f},
+//         {0.295f, 0.55f},
+//         {-0.624f,0.435f}
+//     };
 
 void julia(struct display_buffer *b, uint16_t w, uint16_t h, float cx, float cy) {
     //static uint8_t prnt = 0;

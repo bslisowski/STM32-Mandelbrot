@@ -119,7 +119,8 @@ struct display_buffer {
 
 static struct st7789v_config *display;
 
-// static uint16_t cursor = 0;
+// static uint16_t cursor_x = 0;
+// static uint16_t cursor_y = 0;
 
 static inline void _write_st7789v(uint8_t cmd, uint8_t *data, uint16_t size) {
     cs_enable(display->cs);

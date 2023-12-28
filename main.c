@@ -34,26 +34,18 @@ struct st7789v_config cfg = {
     0x2C,
     { 0x0c, 0x0c, 0x00, 0x33, 0x33 },
     { 0x5a, 0x69, 0x02, 0x01},
-	{ 0xa4, 0xa1},
-    {0xD0, 0x04, 0x0D, 0x11, 0x13, 0x2B, 0x3F, 0x54, 0x4C, 0x18, 0x0D, 0x0B, 0x1F, 0x23},
-    {0xD0, 0x04, 0x0C, 0x11, 0x13, 0x2C, 0x3F, 0x44, 0x51, 0x2F, 0x1F, 0x1F, 0x20, 0x23},
-    {0x00, 0xF0},
-    { 0xCD, 0x08, 0x14},
+    { 0xa4, 0xa1},
+    { 0xD0, 0x04, 0x0D, 0x11, 0x13,
+      0x2B, 0x3F, 0x54, 0x4C, 0x18,
+      0x0D, 0x0B, 0x1F, 0x23
+    },
+    { 0xD0, 0x04, 0x0C, 0x11, 0x13,
+      0x2C, 0x3F, 0x44, 0x51, 0x2F,
+      0x1F, 0x1F, 0x20, 0x23
+    },
+    { 0x00, 0xF0 },
+    { 0xCD, 0x08, 0x14 },
 };
-
-// float julias[11][2] = {
-//         {-0.8f,0.156f},
-//         {-0.4f,0.6f},
-//         {-0.7269f,0.1889f},
-//         {-0.123f,0.745f},
-//         {-0.75f,0.001f},
-//         {-0.391f,-0.587f},
-//         {-1.0f,0.1f},
-//         {0.360284f,0.100376f},
-//         {-0.52f,0.57f},
-//         {0.295f, 0.55f},
-//         {-0.624f,0.435f}
-//     };
 
 int init_tof(void)
 {
@@ -74,6 +66,8 @@ int init_tof(void)
 
 #define WIDTH 24
 #define HEIGHT 24
+
+
 uint16_t buff[WIDTH * HEIGHT];
 
 struct display_buffer db = {
@@ -92,6 +86,7 @@ void move_left_cb(void) {
     move(MOVE_LEFT);
     mandlebrot_zoom(&db, cfg.width, cfg.height);
 }
+
 
 void move_right_cb(void) {
     move(MOVE_RIGHT);
@@ -118,6 +113,8 @@ void zoom_cb(void) {
             db.buffer[i] = WHITE;
         }
         set_background(&db);
+        db.x = 108;
+        db.y = 108;
         draw_number(&db, BLACK, 0);
     }
     zoom_mode = !zoom_mode;
@@ -141,29 +138,7 @@ int main(void) {
     set_background(&db);
     db.x = 0;
     db.y = 0;
-    sprintf(str, "Hello\nWorld\n%f", (double)123.456f);
-    dprint(&db, GREEN, str);
-    return 0;
 
-    char letter = 'A';
-
-    while (db.y < cfg.height) {
-        db.x = 0;
-        while (db.x < cfg.width) {
-            draw_letter(&db, GREEN, letter);
-            letter = (char)((int)letter + 1);
-             
-            if ((int)letter > (int)'Z') {
-                
-                while(1) {
-                    spin(10);
-                }
-            }
-            db.x += (uint16_t)(db.width*2u);
-        }
-        db.y += db.height;
-    }
-    return 0;
     
     _i2c_init(PIN('B', 6), PIN('B', 7));
     init_tof();
