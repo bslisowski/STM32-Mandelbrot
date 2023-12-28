@@ -18,6 +18,7 @@ static uint32_t _zoom = 1;
 #define YMAX (_cy + ((_square/(float)_zoom)/2))
 
 static inline float get_unit() {
+    (void)_alpha_arr;
     float _sq = _square / (float)_zoom;
     return _sq / 24;
 }

@@ -84,29 +84,28 @@ uint8_t zoom_val = 0;
 
 void move_left_cb(void) {
     move(MOVE_LEFT);
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    mandlebrot(&db, cfg.width, cfg.height);
 }
-
 
 void move_right_cb(void) {
     move(MOVE_RIGHT);
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    mandlebrot(&db, cfg.width, cfg.height);
 }
 
 void move_up_cb(void) {
     move(MOVE_UP);
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    mandlebrot(&db, cfg.width, cfg.height);
 }
 
 void move_down_cb(void) {
     move(MOVE_DOWN);
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    mandlebrot(&db, cfg.width, cfg.height);
 }
 
 void zoom_cb(void) {
     if (zoom_mode) {
         zoom(ZOOM_VAL, zoom_val);
-        mandlebrot_zoom(&db, cfg.width, cfg.height);
+        mandlebrot(&db, cfg.width, cfg.height);
     }
     else {
         for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
@@ -131,7 +130,7 @@ int main(void) {
     set_duty_cycle(pwm, 10);
     init_spi(MISO, MOSI, SCK);
     init_st7789v(&cfg);
-
+   
     for (int i = WIDTH*HEIGHT-1; i >= 0; i--) {
             db.buffer[i] = WHITE;
     }
@@ -200,7 +199,7 @@ int main(void) {
     db.x = 0;
     db.y = 0;
     
-    mandlebrot_zoom(&db, cfg.width, cfg.height);
+    mandlebrot(&db, cfg.width, cfg.height);
 
     Dev_t 					dev = 0x52;
 	uint8_t 				status, isReady;
