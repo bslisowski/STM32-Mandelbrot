@@ -1,4 +1,4 @@
-
+## color gradient generator
 
 rgb = []
 rgb.append([])
