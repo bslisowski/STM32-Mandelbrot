@@ -57,8 +57,8 @@
 */
 
 #include "platform.h"
-#include "hal/i2c.h"
-#include "hal/hal_common.h"
+#include "i2c.h"
+#include "hal_common.h"
 
 uint8_t VL53L4CD_RdDWord(Dev_t dev, uint16_t RegisterAdress, uint32_t *value)
 {

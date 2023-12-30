@@ -1,5 +1,5 @@
-#include "hal/hal_common.h"
-#include "hal/st7789v.h"
+#include "hal_common.h"
+#include "st7789v.h"
 #include "fractals.h"
 #include "utils.h"
 #include <inttypes.h>

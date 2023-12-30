@@ -1,6 +1,6 @@
 #ifndef _FRACTALS_H_
 #define _FRACTALS_H_
-#include "hal/font.h"
+#include "font.h"
 
 #define MOVE_UP		0
 #define MOVE_DOWN	1

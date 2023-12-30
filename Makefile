@@ -1,12 +1,12 @@
 CFLAGS  ?=  -O2 -W -Wall -Wextra -Werror -Wundef -Wshadow -Wdouble-promotion \
             -Wformat-truncation -fno-common -Wconversion \
             -g3 -Os -ffunction-sections -fdata-sections \
-            -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include \
+            -I. -Iinclude -Icmsis_core/CMSIS/Core/Include -Icmsis_f3/Include -Istartup -Ihal -Idevice_drivers/button -Idevice_drivers/st7789v -Idevice_drivers/vl53l4cd\
             -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 $(EXTRA_CFLAGS)
 LDFLAGS ?= -Tlink.ld -nostartfiles -nostdlib --specs nano.specs -lm -lc -lrdimon \
 			-u _printf_float -lgcc -Wl,--gc-sections -Wl,-Map=$@.map
-SOURCES = main.c syscalls.c sysinit.c hal/gpio.c hal/usart.c hal/pwm.c hal/spi.c \
-		  hal/st7789v.c hal/i2c.c fractals.c hal/button.c platform.c VL53L4CD_api.c \
+SOURCES = main.c startup/syscalls.c startup/sysinit.c hal/gpio.c hal/usart.c hal/pwm.c hal/spi.c hal/i2c.c fractals.c \
+		  device_drivers/st7789v/st7789v.c device_drivers/button/button.c device_drivers/vl53l4cd/platform.c device_drivers/vl53l4cd/VL53L4CD_api.c \
 		  cmsis_f3/Source/Templates/gcc/startup_stm32f303x8.s
 
 ifeq ($(OS),Windows_NT)
